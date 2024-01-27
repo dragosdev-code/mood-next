@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clerkId String @unique
+  email   String @unique
+
+  // ONE to MANY relationship
+  entries JournalEntry[]
+}
+
+model JournalEntry {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  content String @db.Text
+
+  // ONE to ONE relationship
+  // This field represents a one-to-one relationship between JournalEntry and Analysis.
+  // The '?' makes this field optional to address the chicken-or-egg problem in one-to-one relationships.
+  // This means a JournalEntry can be created without an associated Analysis and vice versa,
+  // preventing issues with required fields during creation of either entity.
+  analysis Analysis?
+
+  @@index([userId])
+}
+
+model Analysis {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entryId String
+  entry   JournalEntry @relation(fields: [entryId], references: [id])
+
+  mood     String
+  summary  String  @db.Text
+  color    String
+  negative Boolean
+
+  @@unique([entryId])
+}
