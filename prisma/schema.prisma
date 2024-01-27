@@ -39,7 +39,7 @@ model JournalEntry {
   // preventing issues with required fields during creation of either entity.
   analysis Analysis?
 
-  @@index([userId])
+  @@unique(name: "compoundId", [userId, id])
 }
 
 model Analysis {
